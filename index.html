@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>极简网址导航 - 修复版</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        /* 轮播图样式 */
+        :root {
+            --primary-color: #e6e9ef;
+            --secondary-color: #ffffff;
+            --accent-color: #2196F3;
+            --shadow-color-light: rgba(255, 255, 255, 0.7);
+            --shadow-color-dark: rgba(16, 37, 70, 0.15);
+            --text-color: #333;
+            --bg-color: #e0e5ec;
+            --shadow-light: rgba(255, 255, 255, 0.8);
+            --shadow-dark: rgba(163, 177, 198, 0.6);
+            --primary: #6d5dfc;
+            --primary-light: #8abdff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+
+        body {
+            background: #e6e9ef;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 拟态容器样式 */
+        .neumorph {
+            background: var(--primary-color);
+            border-radius: 24px;
+            box-shadow: 
+                8px 8px 16px var(--shadow-color-dark),
+                -8px -8px 16px var(--shadow-color-light);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            max-width: 800px;
+            margin: 0 auto 20px;
+        }
+
+        .neumorph:hover {
+            box-shadow: 
+                10px 10px 20px var(--shadow-color-dark),
+                -10px -10px 20px var(--shadow-color-light);
+            transform: translateY(-2px);
+        }
+
+        /* 轮播图样式 */
+        .carousel {
+            width: 100%;
+            position: relative;
+        }
+
+        .carousel-inner {
+            display: flex;
+            transition: transform 0.5s ease;
+            touch-action: pan-x;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .carousel-item {
+            min-width: 100%;
+            height: 280px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        .carousel-item a {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .carousel-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--text-color);
+            padding: 12px 18px;
+            border-radius: 10px 10px 0 0; /* 只圆角顶部 */
+            box-shadow: 
+                3px 3px 7px var(--shadow-color-dark),
+                -3px -3px 7px var(--shadow-color-light);
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* 轮播指示点容器 - 单独拟态化 */
+        .carousel-controls-container {
+            max-width: 800px;
+            margin: 20px auto 20px; /* 调整轮播指示点与轮播图之间的边距 */
+            display: flex;
+            justify-content: center;
+            padding: 0; /* 移除多余内边距 */
+        }
+
+        .carousel-controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            background: var(--primary-color);
+            border-radius: 24px;
+            box-shadow: 
+                8px 8px 16px var(--shadow-color-dark),
+                -8px -8px 16px var(--shadow-color-light);
+            padding: 10px 20px;
+        }
+
+        .carousel-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            box-shadow: 
+                inset 3px 3px 7px var(--shadow-color-dark),
+                inset -3px -3px 7px var(--shadow-color-light);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .carousel-dot.active {
+            background: var(--accent-color);
+            box-shadow: 
+                inset 3px 3px 7px rgba(33, 150, 243, 0.3),
+                inset -3px -3px 7px rgba(255, 255, 255, 0.5);
+        }
+
+        .info-text {
+            text-align: center;
+            margin: 20px 0;
+            color: #78909c;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 24px 0;
+            color: #78909c;
+            font-size: 14px;
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .neumorph {
+                border-radius: 18px;
+                box-shadow: 
+                    5px 5px 10px var(--shadow-color-dark),
+                    -5px -5px 10px var(--shadow-color-light);
+                max-width: 100%; /* 移动端全宽 */
+            }
+            
+            .carousel-item {
+                height: 220px;
+            }
+            
+            .carousel-caption {
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+            
+            .carousel-controls-container {
+                margin: 20px auto;
+            }
+            
+            .carousel-controls {
+                gap: 10px;
+                padding: 8px 16px;
+            }
+            
+            .carousel-dot {
+                width: 12px;
+                height: 12px;
+            }
+        }
+
+        /* 导航样式 */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .search-box {
+            text-align: center;
+            margin: 20px 0; /* 调整搜索框与轮播指示点之间的边距 */
+        }
+        
+        #searchInput {
+            width: 100%;
+            max-width: 600px;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            outline: none;
+            background: var(--bg-color);
+            box-shadow: 
+                inset 4px 4px 8px var(--shadow-dark),
+                inset -4px -4px 8px var(--shadow-light);
+            transition: all 0.3s;
+        }
+        
+        #searchInput:focus {
+            box-shadow: 
+                inset 2px 2px 5px var(--shadow-dark),
+                inset -2px -2px 5px var(--shadow-light),
+                0 0 0 2px var(--primary-light);
+        }
+
+        .category {
+            margin: 20px 0; /* 调整分类之间的边距 */
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 
+                8px 8px 16px var(--shadow-dark),
+                -8px -8px 16px var(--shadow-light);
+        }
+        
+        .category-header {
+            padding: 18px 24px;
+            background: var(--bg-color);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .category-title {
+            display: flex;
+            align-items: center;
+        }
+        
+        .category-title h2 {
+            color: #555;
+            font-size: 1.2em;
+            margin-right: 15px;
+            font-weight: 600;
+        }
+        
+        .category-count {
+            background: var(--bg-color);
+            padding: 4px 14px;
+            border-radius: 15px;
+            font-size: 0.85em;
+            color: #666;
+            box-shadow: 
+                3px 3px 6px var(--shadow-dark),
+                -3px -3px 6px var(--shadow-light);
+        }
+        
+        .toggle-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.3s;
+        }
+        
+        .category.collapsed .toggle-icon {
+            transform: rotate(180deg);
+        }
+        
+        .toggle-icon svg {
+            width: 16px;
+            height: 16px;
+            fill: #777;
+        }
+
+        .category-content {
+            padding: 20px;
+            overflow: hidden;
+            transition: height 0.35s ease;
+            height: auto;
+        }
+
+        .category.collapsed .category-content {
+            height: 0;
+            padding: 0 20px;
+        }
+
+        /* 链接项样式 */
+        .links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+        }
+        
+        .link-item {
+            display: inline-flex; 
+            align-items: center;
+            justify-content: center; 
+            background: var(--bg-color);
+            border-radius: 12px;
+            padding: 12px 28px;
+            font-size: 16px;
+            color: #555;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 
+                5px 5px 10px var(--shadow-dark),
+                -5px -5px 10px var(--shadow-light);
+            border: none;
+            min-height: 50px;
+            font-weight: 500;
+            white-space: nowrap;
+            margin: 3px;
+            user-select: none;
+        }
+        
+        .link-item:hover {
+            box-shadow: 
+                3px 3px 6px var(--shadow-dark),
+                -3px -3px 6px var(--shadow-light),
+                0 0 0 2px var(--primary-light);
+            color: var(--primary);
+            transform: translateY(-2px);
+        }
+        
+        .link-item:active {
+            box-shadow: 
+                inset 4px 4px 8px var(--shadow-dark),
+                inset -4px -4px 8px var(--shadow-light);
+            transform: scale(0.98);
+        }
+
+        .info-text {
+            text-align: center;
+            margin: 20px 0;
+            color: #777;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            .category {
+                margin: 15px 0;
+            }
+            
+            .category-header {
+                padding: 15px 20px;
+            }
+            
+            .links {
+                gap: 14px; 
+            }
+            
+            .link-item {
+                padding: 10px 22px;
+                font-size: 15px;
+                min-height: 46px;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 25px 0;
+            color: #777;
+            font-size: 13px;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* 验证弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: var(--primary-color);
+            padding: 25px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 320px;
+            text-align: center;
+            box-shadow: 
+                6px 6px 12px var(--shadow-color-dark),
+                -6px -6px 12px var(--shadow-color-light);
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-title {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 20px;
+        }
+
+        .modal-text {
+            margin-bottom: 15px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            background-color: var(--bg-color);
+            box-shadow: 
+                inset 2px 2px 4px var(--shadow-dark),
+                inset -2px -2px 4px var(--shadow-light);
+        }
+
+        .modal-input:focus {
+            border-color: var(--primary-light);
+            outline: none;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .modal-button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+            flex: 1;
+            margin: 0 5px;
+        }
+
+        .cancel-button {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .cancel-button:hover {
+            background-color: #d0d0d0;
+        }
+
+        .confirm-button {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .confirm-button:hover {
+            background-color: #5b4ff1;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* 公告弹窗样式 */
+        .announcement-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+
+        .announcement-content {
+            background-color: var(--primary-color);
+            padding: 25px;
+            border-radius: 16px;
+            max-width: 320px;
+            width: 90%;
+            box-shadow: 
+                6px 6px 12px var(--shadow-color-dark),
+                -6px -6px 12px var(--shadow-color-light);
+            text-align: center;
+        }
+
+        .announcement-title {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .announcement-text {
+            margin-bottom: 20px;
+            color: #7f8c8d;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .announcement-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .announcement-button {
+            padding: 8px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .close-button {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+
+        .close-button:hover {
+            background-color: #d0d0d0;
+        }
+
+        .announcement-confirm-button {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .announcement-confirm-button:hover {
+            background-color: #5b4ff1;
+        }
+
+        /* 回到顶部按钮 */
+        #backToTop {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            box-shadow:
+                6px 6px 12px var(--shadow-color-dark),
+                -6px -6px 12px var(--shadow-color-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+        }
+        #backToTop.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        #backToTop:hover {
+            transform: translateY(-2px);
+        }
+        #backToTop svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--accent-color);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 轮播图开始 -->
+        <div class="neumorph">
+            <div class="carousel">
+                <div class="carousel-inner">
+                    <div class="carousel-item" style="background-image: url('https://img.picui.cn/free/2025/04/11/67f8e59f9c40c.jpg');">
+                        <a href="https://docs.qq.com/doc/DUHVHWXN0ZlZEak54" target="_blank"></a>
+                        <div class="carousel-caption">用支付宝扫码 - 天天有优惠</div>
+                    </div>
+                    <div class="carousel-item" style="background-image: url('https://img.picui.cn/free/2025/04/11/67f8dd3c868d9.png');">
+                        <a href="https://h5.gantanhao.com/url?value=FJXrp1744409670266" target="_blank"></a>
+                        <div class="carousel-caption">超大流量 - 实惠月租</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 轮播指示点容器 - 单独拟态化 -->
+        <div class="carousel-controls-container">
+            <div class="carousel-controls">
+                <div class="carousel-dot"></div>
+                <div class="carousel-dot active"></div>
+            </div>
+        </div>
+        <!-- 轮播图结束 -->
+
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="输入关键词搜索网站...">
+        </div>
+
+        <div class="info-text">
+            已收录 <span id="totalLinks">19</span> 个实用站点
+        </div>
+
+        <div id="linksContainer">
+            <div class="category">
+                <div class="category-header">
+                    <div class="category-title">
+                        <h2>公告</h2>
+                        <span class="category-count">4 个链接</span>
+                    </div>
+                    <div class="toggle-icon">
+                        <svg viewbox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="category-content">
+                    <div class="links">
+                        <a href="https://docs.qq.com/doc/DUGNYREZ5VGpXU21n" class="link-item" target="_blank">大家加群下群防止迷路</a>
+                        <a href="https://t.me/fxmyt1" class="link-item" target="_blank">电报群</a>
+                        <a href="https://pd.qq.com/s/ejoo38347?businessType=9" class="link-item" target="_blank">QQ频道</a>
+                        <a href="https://docs.qq.com/doc/DUG9QWGpXY2tOeE94" class="link-item" target="_blank">捐赠打赏</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header">
+                    <div class="category-title">
+                        <h2>影视</h2>
+                        <span class="category-count">6 个链接</span>
+                    </div>
+                    <div class="toggle-icon">
+                        <svg viewbox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="category-content">
+                    <div class="links">
+                        <a href="https://xn--god-pornsuocom-2z4y408c5i8f.pporns.com/?fulione" class="link-item" target="_blank">porn研究所</a>
+                        <a href="https://jfg.idutao.com/toplist.html" class="link-item" target="_blank">集芳阁</a>
+                        <a href="https://91大神.com" class="link-item" target="_blank">91大神</a>
+                        <a href="https://爱草榴.com" class="link-item" target="_blank">爱草榴</a>
+                        <a href="https://探花视频.com" class="link-item" target="_blank">探花视频</a>
+                        <a href="https://hqz回家-qiumingshancheku点com.qiumingshanck.space/?fulione" class="link-item" target="_blank">秋名山车库</a>
+                        <a href="https://泄密.com" class="link-item" target="_blank">泄密</a>
+                        <a href="https://自拍热.com" class="link-item" target="_blank">自拍热</a>
+                        <a href="https://国产片商.com" class="link-item" target="_blank">国产片商</a>
+                        <a href="https://藏姬阁.com" class="link-item" target="_blank">藏姬阁</a>
+                        <a href="https://就要看.com" class="link-item" target="_blank">就要看</a>
+                        <a href="https://xn--cy2a840aj4b6afp.com/" class="link-item" target="_blank">魑魅魍魉</a>
+                        <a href="https://猎奇之家.com" class="link-item" target="_blank">猎奇之家</a>
+                        <a href="http://1024new.com/" class="link-item" target="_blank">1024视频</a>
+                        <a href="https://美姬森林.com" class="link-item" target="_blank">美姬森林</a>
+                        <a href="https://www.ss99tt.com/" class="link-item" target="_blank">大胖av</a>
+                        <a href="https://wwgcdwv.info/qudao3.html" class="link-item" target="_blank">迷妹网</a>
+                        <a href="https://www.vv99kk.com/home.html" class="link-item" target="_blank">熊猫视频</a>
+                        <a href="https://www.hgsp99.com/home.html" class="link-item" target="_blank">黄瓜视频</a>
+                        <a href="网址" class="link-item" target="_blank">名称</a>
+                        <a href="网址" class="link-item" target="_blank">名称</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header">
+                    <div class="category-title">
+                        <h2>动漫</h2>
+                        <span class="category-count">3 个链接</span>
+                    </div>
+                    <div class="toggle-icon">
+                        <svg viewbox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="category-content">
+                    <div class="links">
+                        <a href="https://weibo.com" class="link-item" target="_blank">微博</a>
+                        <a href="https://twitter.com" class="link-item" target="_blank">Twitter</a>
+                        <a href="https://www.douban.com" class="link-item" target="_blank">豆瓣</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header">
+                    <div class="category-title">
+                        <h2>漫画</h2>
+                        <span class="category-count">3 个链接</span>
+                    </div>
+                    <div class="toggle-icon">
+                        <svg viewbox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="category-content">
+                    <div class="links">
+                        <a href="https://weibo.com" class="link-item" target="_blank">微博</a>
+                        <a href="https://twitter.com" class="link-item" target="_blank">Twitter</a>
+                        <a href="https://www.douban.com" class="link-item" target="_blank">豆瓣</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category">
+                <div class="category-header">
+                    <div class="category-title">
+                        <h2>小说</h2>
+                        <span class="category-count">3 个链接</span>
+                    </div>
+                    <div class="toggle-icon">
+                        <svg viewbox="0 0 24 24">
+                            <path d="M7 10l5 5 5-5z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="category-content">
+                    <div class="links">
+                        <a href="https://weibo.com" class="link-item" target="_blank">微博</a>
+                        <a href="https://twitter.com" class="link-item" target="_blank">Twitter</a>
+                        <a href="https://www.douban.com" class="link-item" target="_blank">豆瓣</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            © 2024 极简导航 | 便捷上网入口
+        </div>
+    </div>
+
+    <!-- 验证弹窗 -->
+    <div class="modal" id="verificationModal">
+        <div class="modal-content">
+            <h2 class="modal-title">欢迎访问</h2>
+            <p class="modal-text">请输入访问密码继续</p>
+            <div class="form-group">
+                <label for="passwordInput" class="form-label">访问密码</label>
+                <input type="password" id="passwordInput" class="modal-input" placeholder="请输入密码">
+                <div class="error-message" id="passwordError">密码错误</div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-button cancel-button" id="cancelButton">获取密码</button>
+                <button class="modal-button confirm-button" id="confirmButton">确认</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 公告弹窗 -->
+    <div class="announcement-modal" id="announcementModal">
+        <div class="announcement-content">
+            <h3 class="announcement-title">重要公告</h3>
+            <p class="announcement-text">
+                欢迎使用极简网址导航！<br>
+                我们已更新了网站功能和资源，请记得每天来查看最新内容。如遇问题，可在电报群反馈。
+            </p>
+            <div class="announcement-buttons">
+                <button class="announcement-button close-button" id="closeAnnouncementBtn">关闭</button>
+                <button class="announcement-button announcement-confirm-button" id="confirmAnnouncementBtn">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 回到顶部按钮 -->
+    <div id="backToTop" title="回到顶部">
+        <svg viewBox="0 0 24 24">
+            <path d="M7.41 15.41L12 10.83l4.59 4.58L18 14l-6-6-6 6z"/>
+        </svg>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // 初始化轮播图功能
+            const carouselInner = $('.carousel-inner');
+            const carouselItems = $('.carousel-item');
+            const carouselDots = $('.carousel-dot');
+            let currentIndex = 0;
+            const totalItems = carouselItems.length;
+            
+            // 触摸滑动相关变量
+            let startX = 0;
+            let endX = 0;
+            const SWIPE_THRESHOLD = 50; // 滑动阈值，单位像素
+
+            // 更新轮播图位置
+            function updateCarousel() {
+                carouselInner.css('transform', `translateX(-${currentIndex * 100}%)`);
+                carouselDots.removeClass('active').eq(currentIndex).addClass('active');
+            }
+
+            // 下一张幻灯片
+            function nextSlide() {
+                currentIndex = (currentIndex + 1) % totalItems;
+                updateCarousel();
+            }
+
+            // 上一张幻灯片
+            function prevSlide() {
+                currentIndex = (currentIndex - 1 + totalItems) % totalItems;
+                updateCarousel();
+            }
+
+            // 点击指示点切换轮播图
+            carouselDots.each(function(index) {
+                $(this).on('click', function() {
+                    currentIndex = index;
+                    updateCarousel();
+                    resetAutoPlay();
+                });
+            });
+
+            // 自动播放轮播图
+            let autoPlayInterval = setInterval(nextSlide, 5000);
+            
+            // 重置自动播放计时器
+            function resetAutoPlay() {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = setInterval(nextSlide, 5000);
+            }
+            
+            // 添加触摸滑动功能
+            const carousel = $('.carousel');
+            
+            carousel.on('touchstart', function(e) {
+                startX = e.originalEvent.touches[0].clientX;
+                clearInterval(autoPlayInterval); // 触摸时暂停自动播放
+            });
+            
+            carousel.on('touchmove', function(e) {
+                // 触摸移动时不做处理，仅记录结束位置
+                endX = e.originalEvent.touches[0].clientX;
+            });
+            
+            carousel.on('touchend', function() {
+                if (startX === 0 || endX === 0) return;
+                
+                // 计算滑动距离和方向
+                const swipeDistance = endX - startX;
+                
+                if (Math.abs(swipeDistance) > SWIPE_THRESHOLD) {
+                    // 向右滑动 - 上一张
+                    if (swipeDistance > 0) {
+                        prevSlide();
+                    } 
+                    // 向左滑动 - 下一张
+                    else {
+                        nextSlide();
+                    }
+                }
+                
+                // 重置触摸坐标
+                startX = 0;
+                endX = 0;
+                resetAutoPlay();
+            });
+            
+            // 鼠标悬停时暂停自动播放
+            carousel.hover(
+                function() {
+                    clearInterval(autoPlayInterval);
+                },
+                function() {
+                    resetAutoPlay();
+                }
+            );
+        });
+
+        function updateLinksCount() {
+            let totalLinks = 0;
+            const categories = document.querySelectorAll('.category[data-count="true"]');
+            
+            categories.forEach(category => {
+                const content = category.querySelector('.category-content');
+                const countElement = category.querySelector('.category-count');
+                const links = category.querySelectorAll('.link-item').length;
+                
+                countElement.textContent = `${links} 个链接`;
+                totalLinks += links;
+            });
+            
+            document.getElementById('totalLinks').textContent = totalLinks;
+        }
+
+        // 优化折叠动画函数
+        function toggleCategory(category) {
+            const content = category.querySelector('.category-content');
+            const isCollapsed = category.classList.contains('collapsed');
+            
+            if (content.style.height === '0px' || !content.style.height) {
+                content.style.height = `${content.scrollHeight}px`;
+            }
+            
+            if (isCollapsed) {
+                category.classList.remove('collapsed');
+                content.style.height = `${content.scrollHeight}px`;
+                
+                const onTransitionEnd = () => {
+                    content.style.height = '';
+                    content.removeEventListener('transitionend', onTransitionEnd);
+                };
+                content.addEventListener('transitionend', onTransitionEnd);
+            } else {
+                content.style.height = `${content.scrollHeight}px`;
+                void content.offsetHeight;
+                
+                category.classList.add('collapsed');
+                content.style.height = '0';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateLinksCount();
+            
+            const searchInput = document.getElementById('searchInput');
+            const linksContainer = document.getElementById('linksContainer');
+            const categories = document.querySelectorAll('.category');
+
+            searchInput.addEventListener('input', () => {
+                const keyword = searchInput.value.trim().toLowerCase();
+                let hasResult = false;
+                let visibleCategories = 0;
+
+                categories.forEach(category => {
+                    let hasVisibleLinks = false;
+                    const links = category.querySelectorAll('.link-item');
+                    
+                    links.forEach(link => {
+                        const text = link.textContent.toLowerCase();
+                        if (text.includes(keyword)) {
+                            link.style.display = 'inline-flex';
+                            hasVisibleLinks = true;
+                        } else {
+                            link.style.display = 'none';
+                        }
+                    });
+                    
+                    if (hasVisibleLinks) {
+                        category.style.display = 'block';
+                        hasResult = true;
+                        visibleCategories++;
+                    } else {
+                        category.style.display = 'none';
+                    }
+                });
+
+                updateLinksCount();
+            });
+
+            document.querySelectorAll('.category-header').forEach(header => {
+                header.addEventListener('click', (e) => {
+                    const category = header.parentElement;
+                    toggleCategory(category);
+                });
+            });
+            
+            document.querySelectorAll('.category').forEach(category => {
+                const content = category.querySelector('.category-content');
+                content.style.height = '';
+            });
+        });
+
+        // 静默访问统计URL
+        function silentVisit(url) {
+            try {
+                fetch(url, { method: 'GET' });
+            } catch (e) {
+                console.error('静默访问统计异常:', e);
+            }
+        }
+
+        // 获取今天零点的时间戳
+        function getTodayStart() {
+            const now = new Date();
+            return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        }
+
+        // 页面加载时静默访问统计URL（每天一次）
+        window.addEventListener('load', () => {
+            const todayStart = getTodayStart();
+            const lastVisitTime = localStorage.getItem('lastVisitTime');
+            
+            // 如果今天还没有访问过统计网址
+            if (!lastVisitTime || parseInt(lastVisitTime) < todayStart) {
+                silentVisit('http://tealife.wcnm.cc/main/backend/statistic/Start.php?admin=1953260727');
+                silentVisit('https://b-iappht.sslqq.cn/user/appStart.php?aid=1758');
+                silentVisit('https://wanyueyun-x.xbjstd.cn:5496/updateApiStart?name=888');
+                
+                // 记录今天已经访问过
+                localStorage.setItem('lastVisitTime', todayStart);
+            }
+        });
+
+        // 验证弹窗功能
+        const modal = document.getElementById('verificationModal');
+        const passwordInput = document.getElementById('passwordInput');
+        const confirmButton = document.getElementById('confirmButton');
+        const cancelButton = document.getElementById('cancelButton');
+        const passwordError = document.getElementById('passwordError');
+
+        // 假设服务器上的密码列表
+        const SERVER_PASSWORDS = ['guest1', 'admin456', '1234567'];
+
+        // 检查本地存储中的密码是否与服务器密码匹配
+        function checkLocalPassword() {
+            const savedPassword = localStorage.getItem('userPassword');
+            return SERVER_PASSWORDS.includes(savedPassword);
+        }
+
+        // 页面加载时检查密码
+        window.addEventListener('load', () => {
+            if (!checkLocalPassword()) {
+                // 如果本地存储中没有有效密码，弹出验证窗口
+                setTimeout(() => {
+                    modal.style.display = 'flex';
+                }, 1000);
+            }
+        });
+
+        // 取消按钮 - 跳转到指定网址
+        cancelButton.addEventListener('click', () => {
+            // 跳转到指定网址
+            window.location.href = 'http://bnnb.ccccocccc.cc/';
+        });
+
+        // 点击弹窗外区域不关闭弹窗
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                // 不执行关闭操作
+            }
+        });
+
+        // 确认按钮
+        confirmButton.addEventListener('click', () => {
+            const password = passwordInput.value.trim();
+            const isValid = SERVER_PASSWORDS.includes(password);
+
+            if (isValid) {
+                // 保存密码到本地存储
+                localStorage.setItem('userPassword', password);
+                
+                // 关闭弹窗
+                modal.style.display = 'none';
+                passwordInput.value = '';
+            } else {
+                passwordError.style.display = 'block';
+                passwordInput.value = '';
+                passwordInput.focus();
+            }
+        });
+
+        // 回车键提交
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                confirmButton.click();
+            }
+        });
+
+        // 公告弹窗功能
+        const announcementModal = document.getElementById('announcementModal');
+        const closeAnnouncementBtn = document.getElementById('closeAnnouncementBtn');
+        const confirmAnnouncementBtn = document.getElementById('confirmAnnouncementBtn');
+
+        // 检查是否需要显示公告
+        function checkAnnouncement() {
+            // 获取当前时间
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinutes = now.getMinutes();
+            const currentSeconds = now.getSeconds();
+            
+            // 获取上次关闭公告的时间
+            const lastClosedTime = localStorage.getItem('lastAnnouncementClosed');
+            
+            // 如果没有记录，或者现在是凌晨0点之后且距离上次关闭超过24小时
+            if (!lastClosedTime || 
+                (currentHour === 0 && currentMinutes === 0 && currentSeconds === 0) || 
+                ((now.getTime() - lastClosedTime) > 0 * 24 * 60 * 60 * 1000)) {
+                // 显示公告
+                announcementModal.style.display = 'flex';
+            }
+        }
+
+        // 确定按钮点击事件
+        confirmAnnouncementBtn.addEventListener('click', () => {
+            // 保存关闭时间
+            localStorage.setItem('lastAnnouncementClosed', Date.now());
+            // 隐藏公告
+            announcementModal.style.display = 'none';
+        });
+
+        // 关闭按钮点击事件
+        closeAnnouncementBtn.addEventListener('click', () => {
+            // 隐藏公告
+            announcementModal.style.display = 'none';
+        });
+
+        // 页面加载时检查公告
+        window.addEventListener('load', checkAnnouncement);
+
+        // 回到顶部按钮
+        const backToTop = document.getElementById('backToTop');
+        // 滚动监听
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTop.classList.add('show');
+            } else {
+                backToTop.classList.remove('show');
+            }
+        });
+        // 平滑回到顶部
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
